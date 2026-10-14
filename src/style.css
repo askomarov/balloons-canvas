@@ -1,0 +1,119 @@
+*
+{
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body
+{
+    overflow: hidden;
+    background: radial-gradient(120% 90% at 50% 38%, #f6f6f5 0, #ececeb 62%, #e3e3e1 100%);
+    font-family: 'Sniglet', system-ui, sans-serif;
+}
+
+.threejs
+{
+    position: fixed;
+    top: 0;
+    left: 0;
+    outline: none;
+    touch-action: none;
+    user-select: none;
+}
+
+.prompt
+{
+    position: fixed;
+    top: 1.2rem;
+    left: 1.5rem;
+    color: rgba(20, 20, 18, 0.72);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+}
+
+.prompt.is-on
+{
+    opacity: 1;
+}
+
+.page-switch
+{
+    position: fixed;
+    bottom: 1.2rem;
+    left: 1.5rem;
+    z-index: 10001;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    color: rgba(20, 20, 18, 0.72);
+    border: 1px solid currentColor;
+    background: rgba(255, 255, 255, 0.55);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.page-switch:hover
+{
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.loader
+{
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(120% 90% at 50% 38%, #f6f6f5 0, #ececeb 62%, #e3e3e1 100%);
+    transition: opacity 0.4s ease;
+}
+
+.loader.is-leaving
+{
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader__start
+{
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 1.35rem;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: #ff4a3d;
+    padding: 0.9rem 2.6rem;
+    border-radius: 999px;
+    box-shadow: 0 12px 28px rgba(255, 74, 61, 0.28);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.35s ease, transform 0.35s ease, background 0.15s ease;
+}
+
+.loader.is-ready .loader__start
+{
+    opacity: 1;
+    transform: none;
+}
+
+.loader__start:disabled
+{
+    cursor: default;
+}
+
+.loader.is-ready .loader__start:hover
+{
+    background: #ff5d52;
+}
+
+.loader.is-ready .loader__start:active
+{
+    transform: scale(0.98);
+}
