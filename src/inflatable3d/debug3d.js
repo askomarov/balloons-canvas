@@ -19,27 +19,45 @@ export function createDebug3D({
 }) {
   const inspector = renderer.inspector;
 
-  addTextGui(inspector, inflatable);
+  const { colorEditor } = addTextGui(inspector, inflatable);
   addSoundGui(inspector, sound);
 
   /**
    * Balloon
    */
   const balloonGui = inspector.createParameters("Balloon");
+  const randomizedSliders = [];
+  balloonGui.add({ randomize }, "randomize").name("randomize look");
   balloonGui.add(u.puff, "value", 0, 2, 0.01).name("puff");
   balloonGui.add(u.creaseStrength, "value", 0, 6, 0.01).name("creaseStrength");
-  balloonGui.add(u.seamDarkness, "value", 0, 1, 0.01).name("seamDarkness");
-  balloonGui.add(m.seamTint, "value", 0, 1, 0.01).name("seamTint");
+  randomizedSliders.push(
+    balloonGui.add(u.seamDarkness, "value", 0, 1, 0.01).name("seamDarkness"),
+    balloonGui.add(m.seamTint, "value", 0, 1, 0.01).name("seamTint"),
+  );
   balloonGui.add(u.dentRadius, "value", 0.02, 0.5, 0.001).name("dentRadius");
-  balloonGui.add(m.roughness, "value", 0, 1, 0.001).name("roughness");
-  balloonGui.add(m.clearcoat, "value", 0, 1, 0.001).name("clearcoat");
+  randomizedSliders.push(
+    balloonGui.add(m.roughness, "value", 0, 1, 0.001).name("roughness"),
+    balloonGui.add(m.clearcoat, "value", 0, 1, 0.001).name("clearcoat"),
+  );
   balloonGui
     .add(m.clearcoatRoughness, "value", 0, 1, 0.001)
     .name("clearcoatRoughness");
-  balloonGui.add(m.sheen, "value", 0, 1, 0.001).name("sheen");
-  balloonGui
-    .add(renderer, "toneMappingExposure", 0.2, 3, 0.01)
-    .name("exposure");
+  randomizedSliders.push(
+    balloonGui.add(m.sheen, "value", 0, 1, 0.001).name("sheen"),
+    balloonGui
+      .add(renderer, "toneMappingExposure", 0.2, 3, 0.01)
+      .name("exposure"),
+  );
+
+  function randomize() {
+    u.color.value.setHSL(
+      Math.random(),
+      0.55 + Math.random() * 0.45,
+      0.3 + Math.random() * 0.35,
+    );
+    colorEditor.setValue(u.color.value);
+    randomizedSliders.forEach(randomizeSlider);
+  }
   let segmentsRebuild;
   balloonGui
     .add(inflatable, "segments", 32, 128, 1)
@@ -88,4 +106,13 @@ export function createDebug3D({
   cameraGui.add(controls, "autoRotate").name("autoRotate (orbit on)");
   cameraGui.add(controls, "autoRotateSpeed", -10, 10, 0.1);
   cameraGui.add({ resetCamera }, "resetCamera");
+}
+
+function randomizeSlider(editor) {
+  const min = parseFloat(editor.slider.min);
+  const max = parseFloat(editor.slider.max);
+  const step = parseFloat(editor.slider.step);
+  const decimals = (String(step).split(".")[1] ?? "").length;
+  const value = min + Math.round((Math.random() * (max - min)) / step) * step;
+  editor.setValue(Number(value.toFixed(decimals)));
 }

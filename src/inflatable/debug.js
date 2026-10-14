@@ -75,7 +75,7 @@ export function addTextGui(inspector, inflatable) {
   });
   textGui.add(textParams, "rebuild");
   textGui.add(textParams, "replayIntro");
-  textGui.addColor(u.color, "value").name("color");
+  const colorEditor = textGui.addColor(u.color, "value").name("color");
   textGui
     .add(inflatable.settings, "tracking", -0.1, 0.2, 0.001)
     .onChange(() => inflatable.relayout());
@@ -84,7 +84,7 @@ export function addTextGui(inspector, inflatable) {
     .name("maxSize (0 = fit)")
     .onChange(() => inflatable.relayout());
 
-  return textGui;
+  return { textGui, colorEditor };
 }
 
 export function addSoundGui(inspector, sound) {
@@ -151,6 +151,12 @@ export function addMotionGui(inspector) {
   motionGui.add(u.idleSpeed, "value", 0, 5, 0.01).name("idleSpeed");
   motionGui.add(u.introDuration, "value", 0.05, 8, 0.01).name("introDuration");
   motionGui.add(u.introStagger, "value", 0, 0.5, 0.001).name("introStagger");
+  motionGui
+    .add(u.introLift, "value", 0, 3, 0.01)
+    .name("introLift (× string)");
+  motionGui
+    .add(u.introLiftDelay, "value", 0, 0.9, 0.01)
+    .name("introLiftDelay");
 
   return motionGui;
 }

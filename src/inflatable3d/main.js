@@ -113,7 +113,7 @@ await load.run([
         onLayout: stage.update,
       });
       inflatable.setViewport(sizes.width, sizes.height);
-      inflatable.build("Ballons");
+      inflatable.build("Happy");
       await renderer.compileAsync(scene, camera);
     },
   },

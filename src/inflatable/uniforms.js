@@ -60,6 +60,8 @@ export const uniforms = {
   introStart: uniform(0),
   introDuration: uniform(3.2),
   introStagger: uniform(0.14),
+  introLift: uniform(1),
+  introLiftDelay: uniform(0.3),
 
   // Shadow
   shadowStrength: uniform(1),

@@ -1,8 +1,22 @@
 import { abs, clamp, float, Fn, hash, If, instanceIndex, int, length, Loop, max, min, mix, pow, select, sin, vec2, vec4 } from 'three/tsl'
 import { fieldDistance, letterScale, STATE, STATIC, worldToTex } from './letterBuffers.js'
+import { stringWorldLength } from './strings.js'
 import { uniforms as u } from './uniforms.js'
 
 const DEFLATED = - 0.94
+
+const smooth01 = (x) => x.mul(x).mul(float(3).sub(x.mul(2)))
+
+// Staggered intro: swell over the whole duration, lift off once partly inflated
+const introPhase = (letterIndex) =>
+{
+    const progress = u.simTime.sub(u.introStart).sub(letterIndex.mul(u.introStagger)).div(u.introDuration).clamp()
+    const lift = progress.sub(u.introLiftDelay).div(max(u.introLiftDelay.oneMinus(), 0.001)).clamp()
+    return { inflate: smooth01(progress), lift: smooth01(lift) }
+}
+
+// Grounded start: balloon sits one string length below home
+const liftOffset = (lift) => vec2(0, stringWorldLength().mul(u.introLift).mul(lift.oneMinus()).negate())
 
 export function createLettersCompute({ buffers, fieldTexture })
 {
@@ -17,7 +31,7 @@ export function createLettersCompute({ buffers, fieldTexture })
         const home = staticAt(index, STATIC.HOME)
         const anchor = staticAt(index, STATIC.ANCHOR)
 
-        stateAt(index, STATE.MOTION).assign(vec4(home.xy, 0, 0))
+        stateAt(index, STATE.MOTION).assign(vec4(home.xy.add(liftOffset(float(0))), 0, 0))
         stateAt(index, STATE.SPIN).assign(vec4(anchor.z, 0, 0, 0))
         stateAt(index, STATE.TILT).assign(vec4(0))
         stateAt(index, STATE.INFLATE).assign(vec4(DEFLATED, 0, 0, 0))
@@ -201,10 +215,10 @@ export function createLettersCompute({ buffers, fieldTexture })
             })
         })
 
-        // Walls
+        // Walls (faded in with the lift, a grounded balloon may start below the viewport)
         const limit = u.viewport.mul(0.5).sub(inkRadiusA.mul(0.6))
         const overflow = max(positionA.sub(limit), 0).add(min(positionA.add(limit), 0))
-        force.subAssign(overflow.mul(400))
+        force.subAssign(overflow.mul(400).mul(introPhase(staticAt(index, STATIC.MISC).w).lift))
 
         const forceState = stateAt(index, STATE.FORCE)
         forceState.xy.assign(force)
@@ -239,13 +253,11 @@ export function createLettersCompute({ buffers, fieldTexture })
         const idleX = sin(time.mul(rate).mul(0.63).add(phase.mul(2.3))).mul(u.unit).mul(0.008)
         const idleY = sin(time.mul(rate).add(phase)).mul(u.unit).mul(0.02)
         const idleRotation = sin(time.mul(rate).mul(0.74).add(phase.mul(1.7))).mul(0.018)
-        const positionTarget = home.xy.add(target.zw).add(vec2(idleX, idleY).mul(u.idleAmplitude))
+        const intro = introPhase(letterIndex)
+        const idle = vec2(idleX, idleY).mul(u.idleAmplitude).mul(intro.lift)
+        const positionTarget = home.xy.add(liftOffset(intro.lift)).add(target.zw).add(idle)
         const rotationTarget = restRotation.add(idleRotation.mul(u.idleAmplitude))
-
-        // Intro drive (smoothstep, staggered). Slow swell, then settle.
-        const introProgress = time.sub(u.introStart).sub(letterIndex.mul(u.introStagger)).div(u.introDuration).clamp()
-        const eased = introProgress.mul(introProgress).mul(float(3).sub(introProgress.mul(2)))
-        const inflateTarget = mix(float(DEFLATED), float(0), eased)
+        const inflateTarget = mix(float(DEFLATED), float(0), intro.inflate)
 
         // Position
         const acceleration = positionTarget.sub(motion.xy).mul(u.positionStiffness).sub(motion.zw.mul(u.positionDamping)).add(force)

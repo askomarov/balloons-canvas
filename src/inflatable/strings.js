@@ -14,6 +14,8 @@ const smooth01 = (x) =>
     return t.mul(t).mul(t.mul(- 2).add(3))
 }
 
+export const stringWorldLength = () => u.unit.mul(0.56).mul(u.stringLength)
+
 /**
  * Curly ribbon strings: verlet chain per letter (compute) + ribbon rebuilt in the vertex stage
  */
@@ -40,7 +42,7 @@ export function createStrings({ buffers })
     const pointAt = (letterIndex, k) => pointsBuffer.element(int(letterIndex).mul(POINTS).add(k))
     const previousAt = (letterIndex, k) => previousBuffer.element(int(letterIndex).mul(POINTS).add(k))
 
-    const segmentLength = () => u.unit.mul(0.56 / (POINTS - 1)).mul(u.stringLength)
+    const segmentLength = () => stringWorldLength().div(POINTS - 1)
 
     const anchorWorld = (index) =>
     {
