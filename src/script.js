@@ -74,7 +74,6 @@ renderer.toneMapping = THREE.NoToneMapping;
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0x000000, 0);
-renderer.inspector = new Inspector();
 
 // Sniglet ships 400/800 only — 700 made Safari bake system-font SDF
 const font = { style: "", weight: "800", family: "Sniglet" };
@@ -95,10 +94,11 @@ await load.run([
   {
     weight: 3,
     label: "Letters",
-    task: () => {
+    task: async () => {
       inflatable = new InflatableText({ renderer, scene, font });
       inflatable.setViewport(sizes.width, sizes.height);
       inflatable.build("Ballons");
+      await renderer.compileAsync(scene, camera);
     },
   },
   {
@@ -112,6 +112,9 @@ await load.run([
     },
   },
 ]);
+
+renderer.inspector = new Inspector();
+renderer.inspector.init(); // renderer.init() already ran — mount DOM manually
 
 const playPressSound = async ({ x, y }) => {
   if (!balloonSound.settings.enabled) return;
@@ -186,6 +189,7 @@ const pointerInput = createPointerInput({
  * Animate
  */
 const timer = new THREE.Timer();
+timer.connect(document);
 
 const tick = () => {
   timer.update();

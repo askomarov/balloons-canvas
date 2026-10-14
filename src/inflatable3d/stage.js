@@ -28,7 +28,7 @@ export function createStage({ renderer, scene })
 
     const light = new THREE.DirectionalLight(0xffffff, settings.lightIntensity)
     light.castShadow = true
-    light.shadow.mapSize.set(2048, 2048)
+    light.shadow.mapSize.set(1024, 1024)
     scene.add(light, light.target)
 
     const wallMaterial = new THREE.ShadowNodeMaterial({ color: 0x241717, transparent: true })

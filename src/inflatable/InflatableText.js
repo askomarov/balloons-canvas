@@ -243,6 +243,7 @@ export class InflatableText
         }
         this.strings.dispose()
         this.fieldTexture.dispose()
+        this.buffers.dispose()
 
         this.computes.initCompute.dispose?.()
         this.computes.interactCompute.dispose?.()
@@ -254,5 +255,8 @@ export class InflatableText
         this.letterMesh = null
         this.shadowMesh = null
         this.computes = null
+        this.buffers = null
+        this.strings = null
+        this.fieldTexture = null
     }
 }

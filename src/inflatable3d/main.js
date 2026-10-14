@@ -69,7 +69,7 @@ resetCamera();
  */
 const renderer = new THREE.WebGPURenderer({
   canvas,
-  antialias: true,
+  antialias: false,
   alpha: true,
 });
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -79,7 +79,6 @@ renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0x000000, 0);
-renderer.inspector = new Inspector();
 
 /**
  * Scene
@@ -104,7 +103,7 @@ await load.run([
   {
     weight: 3,
     label: "Letters",
-    task: () => {
+    task: async () => {
       stage = createStage({ renderer, scene });
       stage.setViewport(sizes.width, sizes.height);
       inflatable = new InflatableText3D({
@@ -115,6 +114,7 @@ await load.run([
       });
       inflatable.setViewport(sizes.width, sizes.height);
       inflatable.build("Ballons");
+      await renderer.compileAsync(scene, camera);
     },
   },
   {
@@ -128,6 +128,9 @@ await load.run([
     },
   },
 ]);
+
+renderer.inspector = new Inspector();
+renderer.inspector.init(); // renderer.init() already ran — mount DOM manually
 
 const playPressSound = async ({ x, y }) => {
   if (!balloonSound.settings.enabled) return;
@@ -215,6 +218,7 @@ const pointerInput = createPointerInput({
  * Animate
  */
 const timer = new THREE.Timer();
+timer.connect(document);
 
 const tick = () => {
   timer.update();

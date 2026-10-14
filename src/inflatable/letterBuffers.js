@@ -79,7 +79,13 @@ export function createLetterBuffers(letters)
         }
     }
 
-    return { count, staticBuffer, stateBuffer, staticAt, stateAt, updateStatic, readLetter }
+    const dispose = () =>
+    {
+        staticBuffer.value.dispose()
+        stateBuffer.value.dispose()
+    }
+
+    return { count, staticBuffer, stateBuffer, staticAt, stateAt, updateStatic, readLetter, dispose }
 }
 
 /**

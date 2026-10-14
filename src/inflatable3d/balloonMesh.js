@@ -79,7 +79,7 @@ const relaxToOutline = (fieldTexture, tex, size, layer, band) =>
     return vec3(moved, select(isOutside, float(1), float(0)))
 }
 
-export function createBalloonMesh({ buffers, fieldTexture, segments = 128 })
+export function createBalloonMesh({ buffers, fieldTexture, segments = 64 })
 {
     const surface = balloonSurface(fieldTexture)
     const side = attribute('side', 'float')

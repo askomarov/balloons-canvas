@@ -3,19 +3,20 @@ import { createBalloonMesh } from './balloonMesh.js'
 
 /**
  * Same simulation (layout, compute, strings), real geometry instead of screen locked planes
- * The field is rasterized at twice the 2D resolution: seen from the side or zoomed in, 180px fields show texel steps on the rim
+ * The field is rasterized denser than 2D: seen from the side or zoomed in, 180px fields show texel steps on the rim
  */
 export class InflatableText3D extends InflatableText
 {
-    constructor({ onLayout = null, fontSize = 360, ...options })
+    constructor({ onLayout = null, fontSize = 280, segments = 64, ...options })
     {
         super({ ...options, fontSize })
         this.onLayout = onLayout
+        this.segments = segments
     }
 
     createMeshes({ buffers, fieldTexture })
     {
-        return { letterMesh: createBalloonMesh({ buffers, fieldTexture }) }
+        return { letterMesh: createBalloonMesh({ buffers, fieldTexture, segments: this.segments }) }
     }
 
     applyLayout()

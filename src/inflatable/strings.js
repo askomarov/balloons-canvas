@@ -226,5 +226,20 @@ export function createStrings({ buffers })
     const group = new THREE.Group()
     group.add(shadowMesh, mesh)
 
-    return { group, mesh, shadowMesh, initCompute, stepCompute, dispose: () => { geometry.dispose(); mesh.material.dispose(); shadowMesh.material.dispose() } }
+    return {
+        group,
+        mesh,
+        shadowMesh,
+        initCompute,
+        stepCompute,
+        dispose: () =>
+        {
+            geometry.dispose()
+            mesh.material.dispose()
+            shadowMesh.material.dispose()
+            settingsBuffer.value.dispose()
+            pointsBuffer.value.dispose()
+            previousBuffer.value.dispose()
+        }
+    }
 }

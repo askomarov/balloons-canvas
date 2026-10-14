@@ -40,6 +40,14 @@ export function createDebug3D({
   balloonGui
     .add(renderer, "toneMappingExposure", 0.2, 3, 0.01)
     .name("exposure");
+  let segmentsRebuild;
+  balloonGui
+    .add(inflatable, "segments", 32, 128, 1)
+    .name("segments")
+    .onChange(() => {
+      clearTimeout(segmentsRebuild);
+      segmentsRebuild = setTimeout(() => inflatable.build(inflatable.text), 200);
+    });
 
   addSpringsGui(inspector);
   addInteractionGui(inspector);
