@@ -43,5 +43,7 @@ export function createBalloonSound({ url, volume = 0.7, pitchVariation = 0.12 })
         source.start()
     }
 
-    return { settings, unlock, play }
+    const ready = bufferPromise.then(() => undefined)
+
+    return { settings, unlock, play, ready }
 }

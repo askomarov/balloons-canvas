@@ -6,12 +6,18 @@ import { uniforms } from "./inflatable/uniforms.js";
 import { createDebug } from "./inflatable/debug.js";
 import { createPointerInput } from "./inflatable/pointer.js";
 import { createBalloonSound } from "./inflatable/balloonSound.js";
+import { waitForFont } from "./inflatable/waitFont.js";
+import { createLoadProgress } from "./inflatable/loadProgress.js";
 
 /**
  * Base
  */
 // Canvas
 const canvas = document.querySelector("canvas.threejs");
+const loader = document.querySelector("#loader");
+const startButton = loader.querySelector(".loader__start");
+const prompt = document.querySelector(".prompt");
+const load = createLoadProgress(loader);
 
 // Scene
 const scene = new THREE.Scene();
@@ -69,23 +75,43 @@ renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0x000000, 0);
 renderer.inspector = new Inspector();
-await renderer.init();
 
-/**
- * Inflatable text
- */
-const font = { style: "", weight: "700", family: "Sniglet" };
-await document.fonts
-  .load(`${font.weight} 180px ${font.family}`, "Ballons")
-  .catch(() => {});
+// Sniglet ships 400/800 only — 700 made Safari bake system-font SDF
+const font = { style: "", weight: "800", family: "Sniglet" };
+let inflatable;
+let balloonSound;
 
-const inflatable = new InflatableText({ renderer, scene, font });
-inflatable.setViewport(sizes.width, sizes.height);
-inflatable.build("Ballons");
-
-const balloonSound = createBalloonSound({
-  url: `${import.meta.env.BASE_URL}sounds/balloon.mp3`,
-});
+await load.run([
+  {
+    weight: 4,
+    label: "GPU",
+    task: () => renderer.init(),
+  },
+  {
+    weight: 2,
+    label: "Font",
+    task: () => waitForFont(font),
+  },
+  {
+    weight: 3,
+    label: "Letters",
+    task: () => {
+      inflatable = new InflatableText({ renderer, scene, font });
+      inflatable.setViewport(sizes.width, sizes.height);
+      inflatable.build("Ballons");
+    },
+  },
+  {
+    weight: 1,
+    label: "Audio",
+    task: () => {
+      balloonSound = createBalloonSound({
+        url: `${import.meta.env.BASE_URL}sounds/balloon.mp3`,
+      });
+      return balloonSound.ready;
+    },
+  },
+]);
 
 const playPressSound = async ({ x, y }) => {
   if (!balloonSound.settings.enabled) return;
@@ -102,10 +128,6 @@ createDebug({
 
 // Stay deflated under the loader. Intro clock starts on Start.
 uniforms.introStart.value = 1e6;
-
-const loader = document.querySelector("#loader");
-const startButton = loader.querySelector(".loader__start");
-const prompt = document.querySelector(".prompt");
 
 const openScene = () => {
   if (loader.hidden) return;
@@ -131,8 +153,7 @@ loader.addEventListener("transitionend", (event) => {
   openScene();
 });
 
-loader.classList.add("is-ready");
-startButton.disabled = false;
+load.ready();
 
 /**
  * Resize

@@ -7,13 +7,19 @@
         <title>TSL - Inflatable Type 3D</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@400;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@400;800&display=block" rel="stylesheet">
         <link rel="stylesheet" href="./style.css">
     </head>
 
     <body>
         <div class="loader" id="loader">
-            <button class="loader__start" type="button" disabled>Start</button>
+            <div class="loader__panel">
+                <div class="loader__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Loading">
+                    <div class="loader__fill"></div>
+                </div>
+                <p class="loader__label">0%</p>
+                <button class="loader__start" type="button" disabled>Start</button>
+            </div>
         </div>
         <p class="prompt">Hover, press, sweep or tap the letters · Camera › orbitControls to rotate</p>
         <a class="page-switch" href="./index.html">2D</a>

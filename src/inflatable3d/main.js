@@ -7,8 +7,14 @@ import { createBalloonSound } from "../inflatable/balloonSound.js";
 import { InflatableText3D } from "./InflatableText3D.js";
 import { createStage } from "./stage.js";
 import { createDebug3D } from "./debug3d.js";
+import { waitForFont } from "../inflatable/waitFont.js";
+import { createLoadProgress } from "../inflatable/loadProgress.js";
 
 const canvas = document.querySelector("canvas.threejs");
+const loader = document.querySelector("#loader");
+const startButton = loader.querySelector(".loader__start");
+const prompt = document.querySelector(".prompt");
+const load = createLoadProgress(loader);
 const scene = new THREE.Scene();
 
 const sizes = {
@@ -74,33 +80,54 @@ renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0x000000, 0);
 renderer.inspector = new Inspector();
-await renderer.init();
 
 /**
  * Scene
  */
-const stage = createStage({ renderer, scene });
+// Sniglet ships 400/800 only — 700 made Safari bake system-font SDF
+const font = { style: "", weight: "800", family: "Sniglet" };
+let stage;
+let inflatable;
+let balloonSound;
 
-const font = { style: "", weight: "700", family: "Sniglet" };
-await document.fonts
-  .load(`${font.weight} 180px ${font.family}`, "Ballons")
-  .catch(() => {});
-
-stage.setViewport(sizes.width, sizes.height);
-
-// The stage is sized from the letter unit, which changes on every layout
-const inflatable = new InflatableText3D({
-  renderer,
-  scene,
-  font,
-  onLayout: stage.update,
-});
-inflatable.setViewport(sizes.width, sizes.height);
-inflatable.build("Ballons");
-
-const balloonSound = createBalloonSound({
-  url: `${import.meta.env.BASE_URL}sounds/balloon.mp3`,
-});
+await load.run([
+  {
+    weight: 4,
+    label: "GPU",
+    task: () => renderer.init(),
+  },
+  {
+    weight: 2,
+    label: "Font",
+    task: () => waitForFont(font),
+  },
+  {
+    weight: 3,
+    label: "Letters",
+    task: () => {
+      stage = createStage({ renderer, scene });
+      stage.setViewport(sizes.width, sizes.height);
+      inflatable = new InflatableText3D({
+        renderer,
+        scene,
+        font,
+        onLayout: stage.update,
+      });
+      inflatable.setViewport(sizes.width, sizes.height);
+      inflatable.build("Ballons");
+    },
+  },
+  {
+    weight: 1,
+    label: "Audio",
+    task: () => {
+      balloonSound = createBalloonSound({
+        url: `${import.meta.env.BASE_URL}sounds/balloon.mp3`,
+      });
+      return balloonSound.ready;
+    },
+  },
+]);
 
 const playPressSound = async ({ x, y }) => {
   if (!balloonSound.settings.enabled) return;
@@ -118,10 +145,6 @@ createDebug3D({
 
 // Stay deflated under the loader. Intro clock starts on Start.
 uniforms.introStart.value = 1e6;
-
-const loader = document.querySelector("#loader");
-const startButton = loader.querySelector(".loader__start");
-const prompt = document.querySelector(".prompt");
 
 const openScene = () => {
   if (loader.hidden) return;
@@ -147,8 +170,7 @@ loader.addEventListener("transitionend", (event) => {
   openScene();
 });
 
-loader.classList.add("is-ready");
-startButton.disabled = false;
+load.ready();
 
 /**
  * Resize
