@@ -9,6 +9,7 @@ import { createStage } from "./stage.js";
 import { createDebug3D } from "./debug3d.js";
 import { waitForFont } from "../inflatable/waitFont.js";
 import { createLoadProgress } from "../inflatable/loadProgress.js";
+import { wordFromQuery } from "./wordFromQuery.js";
 
 const canvas = document.querySelector("canvas.threejs");
 const loader = document.querySelector("#loader");
@@ -113,7 +114,7 @@ await load.run([
         onLayout: stage.update,
       });
       inflatable.setViewport(sizes.width, sizes.height);
-      inflatable.build("Happy");
+      inflatable.build(wordFromQuery());
       await renderer.compileAsync(scene, camera);
     },
   },
