@@ -3,7 +3,7 @@
  * Safari will happily resolve fonts.load("700 …") against a fallback face,
  * then canvas measures/rasterizes with the system font → wrong SDF forever.
  */
-export async function waitForFont(font, sample = "Ballons", size = 180) {
+export async function waitForFont(font, sample = "Balloons", size = 180) {
   const spec = `${font.style} ${font.weight} ${size}px ${font.family}`.trim();
 
   await document.fonts.ready;

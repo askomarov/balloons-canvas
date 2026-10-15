@@ -97,7 +97,7 @@ await load.run([
     task: async () => {
       inflatable = new InflatableText({ renderer, scene, font });
       inflatable.setViewport(sizes.width, sizes.height);
-      inflatable.build("Ballons");
+      inflatable.build("Balloons");
       await renderer.compileAsync(scene, camera);
     },
   },
