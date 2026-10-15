@@ -9,7 +9,7 @@ import { createStage } from "./stage.js";
 import { createDebug3D } from "./debug3d.js";
 import { waitForFont } from "../inflatable/waitFont.js";
 import { createLoadProgress } from "../inflatable/loadProgress.js";
-import { wordFromQuery } from "./wordFromQuery.js";
+import { wordFromQuery, hexFromQuery } from "./wordFromQuery.js";
 
 const canvas = document.querySelector("canvas.threejs");
 const loader = document.querySelector("#loader");
@@ -17,6 +17,9 @@ const startButton = loader.querySelector(".loader__start");
 const prompt = document.querySelector(".prompt");
 const load = createLoadProgress(loader);
 const scene = new THREE.Scene();
+
+const hex = hexFromQuery();
+if (hex) uniforms.color.value.set(hex);
 
 const sizes = {
   width: window.innerWidth,
